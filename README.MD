@@ -1,5 +1,10 @@
 # BlockchainFormation
 
+## Requirements
+Install AWS Client
+In Ubuntu:
+sudo apt install awscli
+
 ## General Information
 
 The purpose of this package is to automate the process of deploying blockchain solutions. It is currently supported on AWS or on fresh, own ubuntu 18.04 VMs.

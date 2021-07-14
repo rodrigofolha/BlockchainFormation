@@ -581,7 +581,7 @@ class Node_Handler:
         ssh_key_priv = paramiko.RSAKey.from_private_key_file(self.config['priv_key_path'])
 
         if self.logger is not None:
-            # logger.debug(f"Trying to connect the ssh clients")
+            self.logger.debug(f"Trying to connect the ssh clients")
             pass
 
         self.logger.info(self.config['ips'])
@@ -619,7 +619,7 @@ class Node_Handler:
             scp_clients.append(SCPClient(ssh_clients[index].get_transport(), socket_timeout=86400, progress=Node_Handler.progress, sanitize=lambda x: x))
 
         if self.logger is not None:
-            # logger.debug(f"All scp/ssh clients got created and connected")
+            self.logger.debug(f"All scp/ssh clients got created and connected")
             pass
 
         self.ssh_clients = ssh_clients

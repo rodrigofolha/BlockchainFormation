@@ -25,7 +25,7 @@ import BlockchainFormation.blockchain_specifics.leveldb.Leveldb_Network
 import BlockchainFormation.blockchain_specifics.parity.Parity_Network
 import BlockchainFormation.blockchain_specifics.quorum.Quorum_Network
 import BlockchainFormation.blockchain_specifics.sawtooth.Sawtooth_Network
-import BlockchainFormation.blockchain_specifics.tezos.Tezos_Network
+#import BlockchainFormation.blockchain_specifics.tezos.Tezos_Network
 #import BlockchainFormation.blockchain_specifics.zkrollup.Zkrollup_Network
 
 name = "BlockchainFormation"
