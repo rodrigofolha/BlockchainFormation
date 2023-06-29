@@ -1,37 +1,37 @@
 {
   "instance_provision": "aws",
   "vm_count": 4,
-  "instance_type": "m5.large",
+  "instance_type": "t2.micro",
   "image": {
     "image_id": null,
     "os": "ubuntu",
     "version": 18,
     "permissions": "default"
   },
-  "subnet_id": {"eu-central-1":  "subnet-123"},
-  "security_group_id": {"eu-central-1":  ["sg-123"]},
+  "subnet_id": {"us-east-2":  "subnet-a43fc5d9"},
+  "security_group_id": {"us-east-2":  ["sg-d88daf91"]},
   "proxy": null,
   "user": "ubuntu",
   "profile": "default",
-  "key_name": "key",
-  "aws_credentials": "/home/user/.aws/credentials",
-  "aws_config": "/home/user/.aws/config",
-  "aws_region": {"eu-central-1": 4},
+  "key_name": "dlps",
+  "aws_credentials": "/home/rfolha/.aws/credentials",
+  "aws_config": "/home/rfolha/.aws/config",
+  "aws_region": {"us-east-2": 4},
   "aws_proxy_settings": null,
-  "priv_key_path": "/home/user/.aws/key.pem",
+  "priv_key_path": "/home/rfolha/.aws/dlps.pem",
   "tag_name": "blclab_fabric",
-  "exp_dir": "/home/user/PycharmProjects/BlockchainFormation",
+  "exp_dir": "/home/rfolha/workspace/benchmarking/BlockchainFormation",
   "public_ip": true,
   "storage_settings": [
     {
-      "DeviceName": "/dev/sdb",
+      "DeviceName": "/dev/sda1",
       "VirtualName": "string",
       "Ebs": {
         "DeleteOnTermination": true,
-        "VolumeSize": 16,
+        "VolumeSize": 8,
         "VolumeType": "gp2",
         "Encrypted": true,
-        "KmsKeyId": "arn:aws:kms:eu-central-1:731899578576:key/123"
+        "KmsKeyId": "alias/aws/ebs"
       }
     }
   ],

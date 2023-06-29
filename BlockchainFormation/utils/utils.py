@@ -126,6 +126,118 @@ def wait_till_done(config, ssh_clients, ips, total_time, delta, path, message, t
     return status_flags
 
 
+
+def wait_till_done_contains(config, ssh_clients, ips, total_time, delta, path, message, typical_time, logger,
+                   func_part_one="tail -n 1", func_part_two=" "):
+    """
+    Waits until a job is done on all of the target VMs
+    :param ssh_clients: ssh_clients for VMs on which something must be completed
+    :param ips: ips for the VMs on which something must be completed (for logging only)
+    :param total_time: maximum total waiting time in seconds
+    :param delta: time between two successive attempts
+    :param path: path of the file which is created at completion
+    :param message: content of the file which is created at completion, if message equals False then no message is required
+    :param typical_time: the time which it usually takes
+    :param logger: the logger of the parent (calling) script
+    :param func_part_one: String command called before the path
+    :param func_part_two: String command called after the path
+
+    :return: True if all files with the desired content were created, False otherwise
+    """
+
+    status_flags = np.zeros(len(ssh_clients), dtype=bool)
+    timer = 0
+
+    # TODO: Can this while loop be refactored to be more lean?
+
+    while (False in status_flags and timer < total_time):
+        time.sleep(delta)
+        timer += delta
+        logger.debug(f" --> Waited {timer} seconds so far, {total_time - timer} seconds left before abort"
+                     f"(it usually takes less than {np.ceil(typical_time / 60)} minutes)")
+
+        for index, ip in enumerate(ips):
+            if (status_flags[index] == False):
+                try:
+                    client_sftp = ssh_clients[index].open_sftp()
+                    client_sftp.stat(path)
+                    if (message != False):
+
+                        
+                        if path == False:
+                            stdin, stdout, stderr = ssh_clients[index].exec_command(f"{func_part_one}")
+                        else:
+                            stdin, stdout, stderr = ssh_clients[index].exec_command(f"{func_part_one} {path} {func_part_two}")
+
+                        # read line from stdout
+                        stdout_line = stdout.readlines()
+                        logger.debug(f"Read {stdout_line}")
+
+                        # Check if stdout equals the wanted message
+                        #if stdout_line == f"{message}\n":
+                        find = False
+                        for line in stdout_line:
+                            logger.debug(f"Read {line}")
+                            if message in line:
+                                logger.debug("ACHOOU!")
+                                find = True
+                                break
+                        if find:
+                            status_flags[index] = True
+                            logger.debug(f"   --> ready on {ip}")
+                            continue
+                        else:
+                            logger.debug(f"   --> not yet ready on {ip}")
+                            continue
+
+                    # If there is no message we just need to check if path exists (client_sftp.stat(path))
+                    status_flags[index] = True
+                    # logger.debug(f"   --> ready on {ip}")
+
+                # Try again if SSHException
+                except paramiko.SSHException:
+                    # logger.debug(f"File not yet available on {ip}")
+                    try:
+                        # logger.debug(f"    --> Reconnecting {ip}...")
+                        ssh_key_priv = paramiko.RSAKey.from_private_key_file(config['priv_key_path'])
+                        ssh_clients[index].connect(hostname=config['ips'][index], username=config['user'], pkey=ssh_key_priv)
+                        # logger.debug(f"    --> {ip} reconnected")
+                        try:
+                            client_sftp = ssh_clients[index].open_sftp()
+                            client_sftp.stat(path)
+                            if (message != False):
+                                stdin, stdout, stderr = ssh_clients[index].exec_command(f"tail -n 1 {path}")
+                                if stdout.readlines()[0] == f"{message}\n":
+                                    status_flags[index] = True
+                                    # logger.debug(f"   --> ready on {ip}")
+                                    continue
+                                else:
+                                    # logger.debug(f"   --> not yet ready on {ip}")
+                                    continue
+
+                            status_flags[index] = True
+                            # logger.debug(f"   --> ready on {ip}")
+
+                        except Exception as e:
+                            # logger.exception(e)
+                            # logger.debug(f"   --> still not yet ready on {ip}")
+                            pass
+
+                    except Exception as e:
+                        # logger.exception(e)
+                        # logger.debug("Reconnecting failed")
+                        pass
+
+                except Exception as e:
+                    # logger.exception(e)
+                    # logger.debug(f"   --> not yet ready on {ip}")
+                    pass
+
+        logger.info(f" --> Ready on {len(np.where(status_flags == True)[0])} out of {len(ips)}")
+
+    return status_flags
+
+
 def datetimeconverter(o):
     """Converter to make datetime objects json dumpable"""
     if isinstance(o, datetime.datetime):
